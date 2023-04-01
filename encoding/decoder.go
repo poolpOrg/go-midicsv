@@ -129,6 +129,9 @@ func (d *Decoder) Decode() ([]byte, error) {
 		case "Title_t":
 			midiSMF.Tracks[trackNo].Add(time, smf.MetaTrackSequenceName(record[3]))
 
+		case "Instrument_name_t":
+			midiSMF.Tracks[trackNo].Add(time, smf.MetaInstrument(record[3]))
+
 		case "Lyric_t":
 			midiSMF.Tracks[trackNo].Add(time, smf.MetaLyric(record[3]))
 
