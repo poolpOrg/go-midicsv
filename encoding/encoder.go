@@ -19,7 +19,7 @@ func NewEncoder(rd io.Reader) *Encoder {
 
 func (e *Encoder) Encode() ([]string, error) {
 	ret := make([]string, 0)
-	ret = append(ret, fmt.Sprintf("0,0,Header,%d,%d,%d", e.rd.SMF().Format(), len(e.rd.SMF().Tracks), 0))
+	ret = append(ret, fmt.Sprintf("0,0,Header,%d,%d,%d", e.rd.SMF().Format(), len(e.rd.SMF().Tracks), e.rd.SMF().TimeFormat))
 	e.rd.Do(
 		func(te smf.TrackEvent) {
 			switch te.Message.Type().String() {

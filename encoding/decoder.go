@@ -68,9 +68,8 @@ func (d *Decoder) Decode() ([]byte, error) {
 			division, err := strconv.Atoi(record[5])
 			if err != nil {
 				return nil, err
-
 			}
-			midiSMF.Tracks = make([]smf.Track, nTracks+1)
+			midiSMF.Tracks = make([]smf.Track, nTracks)
 			midiSMF.TimeFormat = smf.MetricTicks(division)
 
 		case "Start_track":
@@ -145,8 +144,20 @@ func (d *Decoder) Decode() ([]byte, error) {
 			midiSMF.Tracks[trackNo].Add(time, midi.ProgramChange(channel, program))
 
 		case "Key_signature":
-			//midiSMF.Tracks[trackNo].Add(time, smf.MetaKey(key, bool, num, ifFlat))
-			//pass
+			c, err := strconv.ParseUint(record[3], 10, 8)
+			if err != nil {
+				return nil, err
+
+			}
+			key := uint8(c)
+
+			major := record[4]
+			isMajor := major == "major"
+
+			_ = key
+			_ = isMajor
+
+			//midiSMF.Tracks[trackNo].Add(time, smf.MetaKey(key, isMajor, 0, false))
 
 		case "Control_c":
 			c, err := strconv.ParseUint(record[3], 10, 8)
