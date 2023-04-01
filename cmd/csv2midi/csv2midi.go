@@ -39,6 +39,9 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-	ofp.Write(b)
+	_, err = ofp.Write(b)
+	if err != nil {
+		log.Fatal(err)
+	}
 	os.Exit(0)
 }

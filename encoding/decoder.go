@@ -153,11 +153,7 @@ func (d *Decoder) Decode() ([]byte, error) {
 
 			major := record[4]
 			isMajor := major == "major"
-
-			_ = key
-			_ = isMajor
-
-			//midiSMF.Tracks[trackNo].Add(time, smf.MetaKey(key, isMajor, 0, false))
+			midiSMF.Tracks[trackNo].Add(time, smf.MetaKey(key, isMajor, 0, false))
 
 		case "Control_c":
 			c, err := strconv.ParseUint(record[3], 10, 8)
@@ -233,6 +229,7 @@ func (d *Decoder) Decode() ([]byte, error) {
 
 		case "End_of_file":
 			//pass
+
 		default:
 			fmt.Println(record)
 			//return nil, err
@@ -241,9 +238,13 @@ func (d *Decoder) Decode() ([]byte, error) {
 	}
 
 	var b bytes.Buffer
-	_, err = midiSMF.WriteTo(bufio.NewWriter(&b))
+	wr := bufio.NewWriter(&b)
+
+	_, err = midiSMF.WriteTo(wr)
 	if err != nil {
 		return nil, err
 	}
+	wr.Flush()
+
 	return b.Bytes(), nil
 }

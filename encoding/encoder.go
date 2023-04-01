@@ -20,8 +20,16 @@ func NewEncoder(rd io.Reader) *Encoder {
 func (e *Encoder) Encode() ([]string, error) {
 	ret := make([]string, 0)
 	ret = append(ret, fmt.Sprintf("0,0,Header,%d,%d,%d", e.rd.SMF().Format(), len(e.rd.SMF().Tracks), e.rd.SMF().TimeFormat))
+
+	tracks := make(map[int]bool)
+
 	e.rd.Do(
 		func(te smf.TrackEvent) {
+			if _, exists := tracks[te.TrackNo]; !exists {
+				ret = append(ret, fmt.Sprintf("%d,%d,Start_track", te.TrackNo, 0))
+				tracks[te.TrackNo] = true
+			}
+
 			switch te.Message.Type().String() {
 			case "MetaTrackName":
 				var trackName string
@@ -79,7 +87,6 @@ func (e *Encoder) Encode() ([]string, error) {
 
 				te.Message.GetMetaLyric(&text)
 				ret = append(ret, fmt.Sprintf("%d,%d,Lyric_t,%s", te.TrackNo, te.AbsTicks, text))
-
 			case "MetaEndOfTrack":
 				ret = append(ret, fmt.Sprintf("%d,%d,End_track", te.TrackNo, te.AbsTicks))
 
@@ -112,14 +119,13 @@ func (e *Encoder) Encode() ([]string, error) {
 				var velocity uint8
 
 				te.Message.GetNoteOff(&channel, &key, &velocity)
-				ret = append(ret, fmt.Sprintf("%d,%d,Note_off_c,%d,%d,%d", te.TrackNo, te.AbsTicks, channel, key, velocity))
+				ret = append(ret, fmt.Sprintf("%d,%d,Note_off_c,%d,%d,0", te.TrackNo, te.AbsTicks, channel, key))
 
 			default:
 				//return nil, fmt.Errorf("unknown type: " + te.Message.Type().String())
 			}
 		},
 	)
-
 	ret = append(ret, "0,0,End_of_file")
 	return ret, nil
 }
