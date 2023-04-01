@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"strings"
 
 	"gitlab.com/gomidi/midi/v2"
 	"gitlab.com/gomidi/midi/v2/smf"
@@ -20,7 +21,9 @@ func NewDecoder(rd io.Reader) *Decoder {
 	dec := &Decoder{
 		rd: csv.NewReader(rd),
 	}
+	dec.rd.Comma = ','
 	dec.rd.FieldsPerRecord = -1
+	dec.rd.LazyQuotes = true
 	return dec
 }
 
@@ -34,6 +37,12 @@ func (d *Decoder) Decode() ([]byte, error) {
 	deltaTicks := make(map[int]uint32)
 
 	for _, record := range records {
+		cleanrecord := make([]string, 0)
+		for _, field := range record {
+			cleanrecord = append(cleanrecord, strings.Trim(field, " "))
+		}
+		record = cleanrecord
+
 		trackNo, err := strconv.Atoi(record[0])
 		if err != nil {
 			return nil, err
